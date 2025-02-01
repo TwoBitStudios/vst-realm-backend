@@ -1,23 +1,28 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
 from beanie import Document, Indexed
-from pydantic import BaseModel
+from beanie.odm.fields import PydanticObjectId
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+)
 
 
-class User(Document):
+class User(BaseModel):
+    # model_config = ConfigDict(populate_by_name=True)
+    id: PydanticObjectId = Field(alias='_id')
+    username: str
+
+
+class PrivateUser(Document):
     username: Indexed(str, unique=True)
     password: str
 
     class Settings:
         name = 'User'
-
-
-class PublicUser(BaseModel):
-    id: Any
-    username: str
 
 
 class Comment(Document):

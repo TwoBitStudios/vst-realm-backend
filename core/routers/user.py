@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Iterable
 
 from beanie.odm.fields import PydanticObjectId
@@ -8,43 +9,39 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 
 from core import models
-from core.models import PublicUser, User
+from core.models import PrivateUser, User
 from core.settings import settings
 
-router = APIRouter()
+router = APIRouter(tags=['Users'])
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
-@router.get('/', tags=['users'])
-async def list_users() -> Iterable[PublicUser]:
-    users = await User.find().to_list()
-    return [PublicUser(id=str(user.id), username=user.username) for user in users]
+@router.get('/')
+async def list_users() -> Iterable[User]:
+    return await PrivateUser.find(projection_model=User).to_list()
 
 
-@router.post('/')
-async def create_user(user: User):
-    hashed_password = pwd_context.hash(user.password)
-
-    user = User(username=user.username, password=hashed_password)
+@router.post('/', status_code=HTTPStatus.CREATED)
+async def create_user(user: PrivateUser) -> User:
+    user.password = pwd_context.hash(user.password)
     await user.insert()
+    user = User(_id=user.id, username=user.username)
 
-    _user = PublicUser(id=str(user.id), username=user.username)
-    return _user
+    return user
 
 
 @router.get('/{id}/')
-async def get_user(id: PydanticObjectId) -> PublicUser:
-    if (user := await User.find_one(User.id == id)) is None:
-        raise HTTPException(status_code=404, detail='User not found.')
+async def get_user(id: PydanticObjectId) -> User:
+    if (user := await PrivateUser.find_one(PrivateUser.id == id, projection_model=User)) is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='User not found.')
 
-    _user = PublicUser(id=str(user.id), username=user.username)
-    return _user
+    return user
 
 
-@router.delete('/{id}/')
+@router.delete('/{id}/', status_code=204)
 async def delete_user(id: PydanticObjectId):
-    if (user := await User.find_one(User.id == id)) is None:
-        raise HTTPException(status_code=404, detail='User not found.')
+    if (user := await PrivateUser.find_one(PrivateUser.id == id)) is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='User not found.')
 
     await user.delete()
