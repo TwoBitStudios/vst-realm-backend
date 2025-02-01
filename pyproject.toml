@@ -99,6 +99,8 @@ atomic = true
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = {extras = ["standard"], version = "^0.115.7"}
+pydantic-settings = "^2.7.1"
+beanie = "^1.29.0"
 
 [tool.poetry.group.dev]
 # This will ensure dev dependencies are only installed with `poetry install --with dev`
