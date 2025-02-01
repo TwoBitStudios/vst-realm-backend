@@ -8,7 +8,6 @@ from jose import JWTError, jwt
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 
-from core import models
 from core.models import PrivateUser, User
 from core.settings import settings
 
@@ -32,7 +31,7 @@ async def create_user(user: PrivateUser) -> User:
 
 
 @router.get('/{id}/')
-async def get_user(id: PydanticObjectId) -> User:
+async def retrieve_user(id: PydanticObjectId) -> User:
     if (user := await PrivateUser.find_one(PrivateUser.id == id, projection_model=User)) is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='User not found.')
 

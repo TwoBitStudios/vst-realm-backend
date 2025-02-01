@@ -59,4 +59,6 @@ async def get_docs_ui(request: Request):
     )
 
 
-app.include_router(routers.user.router, prefix='/user')
+app.include_router(routers.user_router, prefix='/user')
+app.include_router(routers.comment_router, prefix='/comment')
+app.include_router(routers.product_router, prefix='/product')

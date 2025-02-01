@@ -38,8 +38,9 @@ class Comment(Document):
 
 
 class Product(Document):
-    comments: list[BackLink['Comment']] = Field(list(), original_field='product')
+    external_id: str
     affiliate_links: list[str]
+    comments: list[BackLink['Comment']] = Field(list(), original_field='product')
 
     class Settings:
         name = 'Product'
