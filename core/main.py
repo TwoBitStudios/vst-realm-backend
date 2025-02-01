@@ -1,11 +1,18 @@
 from contextlib import asynccontextmanager
 
-from beanie import Document, init_beanie
-from fastapi import FastAPI
+from beanie import init_beanie
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html, get_swagger_ui_oauth2_redirect_html
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from core import models, routers
+from core import (
+    PROJECT_VERSION,
+    models,
+    routers,
+)
 from core.settings import settings
 
 
@@ -21,7 +28,15 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+templates = Jinja2Templates(directory='core/templates')
+
+app = FastAPI(
+    lifespan=lifespan,
+    title='VST Realm API',
+    version=PROJECT_VERSION,
+    docs_url=None,
+    redoc_url='/redoc/',
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,5 +45,18 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*']
 )
+
+
+@app.get('/docs/', include_in_schema=False, response_class=HTMLResponse)
+async def get_docs_ui(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name='elements.html',
+        context={
+            'title': app.title,
+            'api_description_url': app.openapi_url
+        },
+    )
+
 
 app.include_router(routers.user.router, prefix='/user')

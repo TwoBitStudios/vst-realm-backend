@@ -105,6 +105,7 @@ python-jose = "^3.3.0"
 uvicorn = "^0.34.0"
 cryptography = "^44.0.0"
 passlib = "^1.7.4"
+jinja2 = "^3.1.5"
 
 [tool.poetry.group.dev]
 # This will ensure dev dependencies are only installed with `poetry install --with dev`
