@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from beanie import Document, Indexed
-from beanie.odm.fields import PydanticObjectId
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
+from beanie import (
+    BackLink,
+    Document,
+    Indexed,
+    Link,
 )
+from beanie.odm.fields import PydanticObjectId
+from pydantic import BaseModel, Field
 
 
 class User(BaseModel):
-    # model_config = ConfigDict(populate_by_name=True)
     id: PydanticObjectId = Field(alias='_id')
     username: str
 
@@ -20,6 +20,7 @@ class User(BaseModel):
 class PrivateUser(Document):
     username: Indexed(str, unique=True)
     password: str
+    comments: list[BackLink['Comment']] = Field(list(), original_field='user')
 
     class Settings:
         name = 'User'
@@ -27,18 +28,17 @@ class PrivateUser(Document):
 
 class Comment(Document):
     message: str
-    user: User
-    created_at: datetime
-    updated_at: datetime
-    replied_to: list[Comment]
-    replies: list[Comment]
+    user: Link[PrivateUser]
+    product: Link[Product]
+    created_at: datetime = datetime.now()
+    updated_at: datetime | None = None
 
     class Settings:
         name = 'Comment'
 
 
 class Product(Document):
-    comments: list[Comment]
+    comments: list[BackLink['Comment']] = Field(list(), original_field='product')
     affiliate_links: list[str]
 
     class Settings:
