@@ -14,10 +14,14 @@ from pydantic import BaseModel, Field
 
 class User(BaseModel):
     id: PydanticObjectId = Field(alias='_id')
+    first_name: str
+    last_name: str
     username: str
 
 
 class PrivateUser(Document):
+    first_name: str
+    last_name: str
     username: Indexed(str, unique=True)
     password: str
     comments: list[BackLink['Comment']] = Field(list(), original_field='user')
