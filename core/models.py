@@ -14,20 +14,37 @@ from pydantic import BaseModel, Field
 
 class User(BaseModel):
     id: PydanticObjectId = Field(alias='_id')
-    first_name: str
-    last_name: str
-    username: str
+    given_name: str
+    family_name: str
+    email: str
+    email_verified: bool = False
 
 
 class PrivateUser(Document):
-    first_name: str
-    last_name: str
-    username: Indexed(str, unique=True)
+    given_name: str
+    family_name: str
+    email: Indexed(str, unique=True)
+    email_verified: bool = False
     password: str
     comments: list[BackLink['Comment']] = Field(list(), original_field='user')
 
     class Settings:
         name = 'User'
+
+
+class Account(Document):
+    user_id: PydanticObjectId
+    type: str
+    provider: str
+    provider_account_id: str
+    refresh_token: str
+    access_token: str
+    expires_at: int
+    token_type: str
+    image: str
+
+    class Settings:
+        name = 'Account'
 
 
 class Comment(Document):

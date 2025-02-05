@@ -17,8 +17,8 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 
 
-async def authenticate_user(username: str, password: str) -> PrivateUser | None:
-    if (user := await PrivateUser.find_one(PrivateUser.username == username)) is None:
+async def authenticate_user(email: str, password: str) -> PrivateUser | None:
+    if (user := await PrivateUser.find_one(PrivateUser.email == email)) is None:
         return None
 
     if not pwd_context.verify(password, user.password):

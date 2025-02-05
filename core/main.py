@@ -17,7 +17,6 @@ from core.settings import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     client = AsyncIOMotorClient(settings.MONGODB_READ_URL)
     await init_beanie(
         database=client[settings.MONGODB_DATABASE],
@@ -61,3 +60,4 @@ async def get_docs_ui(request: Request):
 app.include_router(routers.user_router, prefix='/user')
 app.include_router(routers.comment_router, prefix='/comment')
 app.include_router(routers.product_router, prefix='/product')
+app.include_router(routers.auth_router, prefix='/auth')
