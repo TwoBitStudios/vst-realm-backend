@@ -5,7 +5,7 @@ from beanie.odm.fields import PydanticObjectId
 from fastapi import APIRouter, HTTPException
 
 from core.models import PrivateUser, User
-from core.routers.utils import pwd_context
+from core.routers.auth.utils import pwd_context
 
 router = APIRouter(tags=['Users'])
 

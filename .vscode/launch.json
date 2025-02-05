@@ -11,7 +11,9 @@
             "module": "uvicorn",
             "args": [
                 "core.main:app",
-                "--reload"
+                "--reload",
+                "--port",
+                "8108",
             ],
             "jinja": true
         }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import pymongo
 from beanie import (
     BackLink,
     Document,
@@ -10,6 +11,7 @@ from beanie import (
 )
 from beanie.odm.fields import PydanticObjectId
 from pydantic import BaseModel, Field
+from pymongo import IndexModel
 
 
 class User(BaseModel):
@@ -18,6 +20,16 @@ class User(BaseModel):
     family_name: str
     email: str
     email_verified: bool = False
+
+    @classmethod
+    def from_private_user(cls, _user: PrivateUser):
+        return cls(
+            _id=_user.id,
+            given_name=_user.given_name,
+            family_name=_user.family_name,
+            email=_user.email,
+            email_verified=_user.email_verified,
+        )
 
 
 class PrivateUser(Document):
@@ -34,17 +46,26 @@ class PrivateUser(Document):
 
 class Account(Document):
     user_id: PydanticObjectId
-    type: str
     provider: str
     provider_account_id: str
-    refresh_token: str
     access_token: str
-    expires_at: int
+    expires_at: datetime
     token_type: str
-    image: str
+    refresh_token: str = ''
+    image: str = ''
 
     class Settings:
         name = 'Account'
+        indexes = [
+            IndexModel(
+                [
+                    ('user_id', pymongo.ASCENDING),
+                    ('provider_account_id', pymongo.ASCENDING)
+                ],
+                name='user_id__provider_account_id__unique_together',
+                unique=True,
+            )
+        ]
 
 
 class Comment(Document):
@@ -65,3 +86,13 @@ class Product(Document):
 
     class Settings:
         name = 'Product'
+
+
+class LoginResponse(BaseModel):
+    user: User
+    access_token: str
+    expires_in: int
+    token_type: str
+    scope: str | None = None
+    refresh_token: str | None = None
+    id_token: str | None = None
