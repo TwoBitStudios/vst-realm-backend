@@ -57,6 +57,18 @@ async def get_docs_ui(request: Request):
     )
 
 
+@app.get('/auth/exists/')
+async def check_email_exists(email: str) -> dict:
+    user = await models.PrivateUser.find_one(models.PrivateUser.email == email)
+    exists = user is not None
+    is_local = bool(user.password) if exists else False
+
+    return {
+        'exists': exists,
+        'is_local': is_local,
+    }
+
+
 app.include_router(routers.user_router, prefix='/user')
 app.include_router(routers.comment_router, prefix='/comment')
 app.include_router(routers.product_router, prefix='/product')

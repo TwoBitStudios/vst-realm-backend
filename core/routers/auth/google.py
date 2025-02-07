@@ -9,6 +9,7 @@ from json import JSONDecodeError
 
 import requests
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 from requests.exceptions import RequestException
 
@@ -52,12 +53,14 @@ async def auth_google(code: str) -> LoginResponse:
     if (user_data := get_google_user_data(access_token)) is None:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Could not authenticate.')
 
-    user = User.from_private_user(await get_or_create_user(
-        given_name=user_data.get('given_name'),
-        family_name=user_data.get('family_name'),
-        email=user_data.get('email'),
-        email_verified=user_data.get('verified_email'),
-    ))
+    user = User.from_private_user(
+        await get_or_create_user(
+            given_name=user_data.get('given_name'),
+            family_name=user_data.get('family_name'),
+            email=user_data.get('email'),
+            email_verified=user_data.get('verified_email'),
+        )
+    )
 
     expires_at = datetime.now(tz=timezone.utc) - timedelta(seconds=token_data.get('expires_in', 0))
     await get_or_create_account(
@@ -69,15 +72,20 @@ async def auth_google(code: str) -> LoginResponse:
         token_type='bearer',
     )
 
-    return LoginResponse(**{
-        'user': user,
-        'access_token': access_token,
-        'expires_in': token_data.get('expires_in', 0),
-        'token_type': token_data.get('token_type', 'bearer'),
-        'scope': token_data.get('scope'),
-        'refresh_token': token_data.get('refresh_token'),
-        'id_token': token_data.get('id_token'),
-    })
+    return RedirectResponse(f'{settings.FRONTEND_LOGIN_REDIRECT_URI}?access_token={access_token}')
+
+    # return LoginResponse(
+    #     **{
+    #         'user': user,
+    #         'access_token': access_token,
+    #         'expires_in': token_data.get('expires_in', 0),
+    #         'token_type': token_data.get('token_type', 'bearer'),
+    #         'scope': token_data.get('scope'),
+    #         'refresh_token': token_data.get('refresh_token'),
+    #         'id_token': token_data.get('id_token'),
+    #     }
+    # )
+
 
 def get_google_access_token(code: str) -> dict:
     token_url = 'https://accounts.google.com/o/oauth2/token'
@@ -91,18 +99,22 @@ def get_google_access_token(code: str) -> dict:
 
     try:
         response = requests.post(token_url, data=data)
-    
+
     except RequestException as exc:
-        logger.error(f'Did not retrieve access token from Google.  Reason: Encountered an error during the request.  Exception: {exc}')
+        logger.error(
+            f'Did not retrieve access token from Google.  Reason: Encountered an error during the request.  Exception: {exc}'
+        )
         return None
-    
+
     try:
         token_data = response.json()
-    
+
     except JSONDecodeError as exc:
-        logger.error(f'Did not retrieve access token from Google.  Reason: Could not read the response data.  Exception: {exc}')
+        logger.error(
+            f'Did not retrieve access token from Google.  Reason: Could not read the response data.  Exception: {exc}'
+        )
         return None
-    
+
     return token_data
 
 
@@ -113,16 +125,20 @@ def get_google_user_data(access_token: str) -> dict:
                 'Authorization': f'Bearer {access_token}'
             }
         )
-    
+
     except RequestException as exc:
-        logger.error(f'Did not retrieve user data from Google.  Reason: Encountered an error during the request.  Exception: {exc}')
+        logger.error(
+            f'Did not retrieve user data from Google.  Reason: Encountered an error during the request.  Exception: {exc}'
+        )
         return None
 
     try:
         user_info = response.json()
 
     except JSONDecodeError as exc:
-        logger.error(f'Did not retrieve user data from Google.  Reason: Could not read the response data.  Exception: {exc}')
+        logger.error(
+            f'Did not retrieve user data from Google.  Reason: Could not read the response data.  Exception: {exc}'
+        )
         return None
 
     return user_info

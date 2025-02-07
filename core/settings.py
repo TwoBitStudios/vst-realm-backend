@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     CSRF_ALLOWED_ORIGINS: list[str] = ['*']
 
+    FRONTEND_LOGIN_REDIRECT_URI: str = 'http://localhost:5173/'
+
     JWT_SECRET: str = 'jfklajelj;kfjeklj298uf29p23u[jfo32fi2ffa;lksf]'
     JWT_ALGORITHM: str = 'HS256'
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
