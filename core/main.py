@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     client = AsyncIOMotorClient(settings.MONGODB_READ_URL)
     await init_beanie(
         database=client[settings.MONGODB_DATABASE],
-        document_models=[models.PrivateUser, models.Account, models.Comment, models.Product]
+        document_models=[models.UserInDB, models.Account, models.Comment, models.Product]
     )
 
     yield
@@ -59,7 +59,7 @@ async def get_docs_ui(request: Request):
 
 @app.get('/auth/exists/')
 async def check_email_exists(email: str) -> dict:
-    user = await models.PrivateUser.find_one(models.PrivateUser.email == email)
+    user = await models.UserInDB.find_one(models.UserInDB.email == email)
     exists = user is not None
     is_local = bool(user.password) if exists else False
 
@@ -72,5 +72,6 @@ async def check_email_exists(email: str) -> dict:
 app.include_router(routers.user_router, prefix='/user')
 app.include_router(routers.comment_router, prefix='/comment')
 app.include_router(routers.product_router, prefix='/product')
+app.include_router(routers.base_auth_router, prefix='/auth')
 app.include_router(routers.local_auth_router, prefix='/auth/local')
 app.include_router(routers.google_auth_router, prefix='/auth/google')

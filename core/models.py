@@ -22,7 +22,7 @@ class User(BaseModel):
     email_verified: bool = False
 
     @classmethod
-    def from_private_user(cls, _user: PrivateUser):
+    def from_db(cls, _user: UserInDB):
         return cls(
             _id=_user.id,
             given_name=_user.given_name,
@@ -32,7 +32,7 @@ class User(BaseModel):
         )
 
 
-class PrivateUser(Document):
+class UserInDB(Document):
     given_name: str
     family_name: str
     email: Indexed(str, unique=True)
@@ -58,10 +58,7 @@ class Account(Document):
         name = 'Account'
         indexes = [
             IndexModel(
-                [
-                    ('user_id', pymongo.ASCENDING),
-                    ('provider_account_id', pymongo.ASCENDING)
-                ],
+                [('user_id', pymongo.ASCENDING), ('provider_account_id', pymongo.ASCENDING)],
                 name='user_id__provider_account_id__unique_together',
                 unique=True,
             )
@@ -70,7 +67,7 @@ class Account(Document):
 
 class Comment(Document):
     message: str
-    user: Link[PrivateUser]
+    user: Link[UserInDB]
     product: Link[Product]
     created_at: datetime = datetime.now()
     updated_at: datetime | None = None
@@ -88,11 +85,11 @@ class Product(Document):
         name = 'Product'
 
 
-class LoginResponse(BaseModel):
-    user: User
+class Token(BaseModel):
     access_token: str
-    expires_in: int
     token_type: str
-    scope: str | None = None
-    refresh_token: str | None = None
-    id_token: str | None = None
+    expires_in: int = 0
+
+
+class TokenData(BaseModel):
+    email: str | None = None

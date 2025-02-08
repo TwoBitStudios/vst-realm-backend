@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = 'jfklajelj;kfjeklj298uf29p23u[jfo32fi2ffa;lksf]'
     JWT_ALGORITHM: str = 'HS256'
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     LOCAL_PROVIDER_NAME: str = 'vst-realm'
     LOCAL_PROVIDER_ACCOUNT_ID: str = 'vst-realm'
 
