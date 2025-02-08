@@ -9,6 +9,7 @@ from fastapi import (
 )
 from fastapi.security import OAuth2PasswordRequestForm
 
+from core.constants import Provider
 from core.models import (
     Token,
     User,
@@ -55,4 +56,5 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> T
         access_token=access_token,
         token_type='Bearer',
         expires_in=int((expires - datetime.now(tz=timezone.utc)).total_seconds()),
+        provider=Provider.LOCAL,
     )

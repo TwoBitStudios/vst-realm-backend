@@ -13,6 +13,8 @@ from beanie.odm.fields import PydanticObjectId
 from pydantic import BaseModel, Field
 from pymongo import IndexModel
 
+from core.constants import Provider
+
 
 class User(BaseModel):
     id: PydanticObjectId = Field(alias='_id')
@@ -89,6 +91,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     expires_in: int = 0
+    provider: Provider
 
 
 class TokenData(BaseModel):

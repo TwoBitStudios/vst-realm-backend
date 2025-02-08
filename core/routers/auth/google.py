@@ -43,9 +43,9 @@ async def login():
     }
 
 
-@router.post('/authenticate/')
-async def auth_google(data: GoogleAuthenticate) -> RedirectResponse:
-    token_data = get_google_access_token(data.code)
+@router.get('/authenticate/')
+async def auth_google(code: str, redirect_uri: str | None = None) -> Token:
+    token_data = get_google_access_token(code)
 
     if (google_access_token := token_data.get('access_token')) is None:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='No access token was provided.')
@@ -83,10 +83,11 @@ async def auth_google(data: GoogleAuthenticate) -> RedirectResponse:
         access_token=access_token,
         token_type='Bearer',
         expires_in=int((expires - datetime.now(tz=timezone.utc)).total_seconds()),
+        provider=Provider.GOOGLE,
     )
 
-    params = f'?access_token={token.access_token}&token_type={token.token_type}&expires_in={token.expires_in}'
-    redirect = f'{data.redirect_uri or settings.FRONTEND_LOGIN_REDIRECT_URI}{params}'
+    params = f'?access_token={token.access_token}&token_type={token.token_type}&expires_in={token.expires_in}&provider={token.provider.value}'
+    redirect = f'{redirect_uri or settings.FRONTEND_LOGIN_REDIRECT_URI}{params}'
 
     return RedirectResponse(redirect)
 
