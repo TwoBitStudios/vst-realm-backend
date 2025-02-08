@@ -25,7 +25,7 @@ from core.settings import settings
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=['Auth: Google'])
+router = APIRouter(tags=['Auth'])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token')
 
 
@@ -34,7 +34,7 @@ class GoogleAuthenticate(BaseModel):
     redirect_uri: str | None = None
 
 
-@router.get('/login/')
+@router.get('/login/', summary='Google: Login URL')
 async def login():
     """ The authentication endpoint to be used if authenticating with Google. """
     return {
@@ -43,7 +43,7 @@ async def login():
     }
 
 
-@router.get('/authenticate/')
+@router.get('/authenticate/', summary='Google: Authentication Redirect')
 async def auth_google(code: str, redirect_uri: str | None = None) -> Token:
     token_data = get_google_access_token(code)
 

@@ -22,10 +22,10 @@ from core.routers.auth.utils import (
 )
 from core.settings import settings
 
-router = APIRouter(tags=['Auth: Local'])
+router = APIRouter(tags=['Auth'])
 
 
-@router.post('/login/')
+@router.post('/login/', summary='Local: Login')
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     """ The authentication endpoint to be used if authenticating with local credentials. """
     if (user := await authenticate_user(form_data.username, form_data.password)) is None:
