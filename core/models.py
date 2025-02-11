@@ -68,14 +68,20 @@ class Account(Document):
 
 
 class Comment(Document):
+    id: str
     message: str
     user: Link[UserInDB]
-    product: Link[Product]
     created_at: datetime = datetime.now()
     updated_at: datetime | None = None
-
+    votes: int
+    votedUsers: list[Link[UserInDB]]
+    replies: list[Comment]
     class Settings:
         name = 'Comment'
+
+class CreateCommentRequest(BaseModel):
+    message: str
+    user_id: str
 
 
 class Product(Document):
@@ -85,6 +91,10 @@ class Product(Document):
 
     class Settings:
         name = 'Product'
+
+class CommentSection(Document):
+    external_id: str
+    comments: list[Comment]
 
 
 class Token(BaseModel):

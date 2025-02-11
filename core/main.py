@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     client = AsyncIOMotorClient(settings.MONGODB_READ_URL)
     await init_beanie(
         database=client[settings.MONGODB_DATABASE],
-        document_models=[models.UserInDB, models.Account, models.Comment, models.Product]
+        document_models=[models.UserInDB, models.Account, models.Comment, models.CommentSection, models.Product]
     )
 
     yield
