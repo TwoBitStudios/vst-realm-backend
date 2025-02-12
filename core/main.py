@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     client = AsyncIOMotorClient(settings.MONGODB_READ_URL)
     await init_beanie(
         database=client[settings.MONGODB_DATABASE],
-        document_models=[models.UserInDB, models.Account, models.Comment, models.CommentSection, models.Product]
+        document_models=[models.UserInDB, models.Account, models.Comment, models.CommentVote, models.Product],
     )
 
     yield
@@ -41,7 +41,7 @@ app.add_middleware(
     allow_origins=settings.CSRF_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=['*'],
-    allow_headers=['*']
+    allow_headers=['*'],
 )
 
 
@@ -50,10 +50,7 @@ async def get_docs_ui(request: Request):
     return templates.TemplateResponse(
         request,
         name='elements.html',
-        context={
-            'title': app.title,
-            'api_description_url': app.openapi_url
-        },
+        context={'title': app.title, 'api_description_url': app.openapi_url},
     )
 
 
@@ -71,6 +68,7 @@ async def check_email_exists(email: str) -> dict:
 
 app.include_router(routers.user_router, prefix='/user')
 app.include_router(routers.comment_router, prefix='/comment')
+app.include_router(routers.comment_vote_router, prefix='/comment-vote')
 app.include_router(routers.product_router, prefix='/product')
 app.include_router(routers.base_auth_router, prefix='/auth')
 app.include_router(routers.local_auth_router, prefix='/auth/local')

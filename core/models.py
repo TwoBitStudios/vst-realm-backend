@@ -7,13 +7,12 @@ from beanie import (
     BackLink,
     Document,
     Indexed,
-    Link,
 )
 from beanie.odm.fields import PydanticObjectId
 from pydantic import BaseModel, Field
 from pymongo import IndexModel
 
-from core.constants import Provider
+from core.constants import CommentAction, Provider
 
 
 class User(BaseModel):
@@ -67,21 +66,22 @@ class Account(Document):
         ]
 
 
+class CommentVote(Document):
+    action: CommentAction
+    comment_id: PydanticObjectId
+    user_id: PydanticObjectId
+
+
 class Comment(Document):
-    id: str
     message: str
-    user: Link[UserInDB]
+    user_id: PydanticObjectId
+    product_id: PydanticObjectId
     created_at: datetime = datetime.now()
     updated_at: datetime | None = None
-    votes: int
-    votedUsers: list[Link[UserInDB]]
-    replies: list[Comment]
+    replies: list[PydanticObjectId] = []
+
     class Settings:
         name = 'Comment'
-
-class CreateCommentRequest(BaseModel):
-    message: str
-    user_id: str
 
 
 class Product(Document):
@@ -91,10 +91,6 @@ class Product(Document):
 
     class Settings:
         name = 'Product'
-
-class CommentSection(Document):
-    external_id: str
-    comments: list[Comment]
 
 
 class Token(BaseModel):
