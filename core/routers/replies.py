@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Annotated
+from typing import Annotated, Literal
 
 from beanie.odm.fields import PydanticObjectId
 from beanie.operators import In
@@ -19,6 +19,7 @@ router = APIRouter(tags=['Replies'])
 class CommentQueryParams(BaseModel):
     limit: int = 10
     skip: int = 0
+    order_by: Literal['created_at', '-created_at', 'updated_at', '-updated_at'] = '-created_at'
 
 
 @router.get('/{parent_id}/')
@@ -26,7 +27,13 @@ async def get_replies(parent_id: PydanticObjectId, query: Annotated[CommentQuery
     if not (parent_comment := await Comment.find_one(Comment.id == parent_id)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parent Comment not found.')
 
-    return await Comment.find(In(Comment.id, parent_comment.replies)).skip(query.skip).limit(query.limit).to_list()
+    return (
+        await Comment.find(In(Comment.id, parent_comment.replies))
+        .skip(query.skip)
+        .limit(query.limit)
+        .sort(query.order_by)
+        .to_list()
+    )
 
 
 @router.post('/{parent_id}/', status_code=status.HTTP_201_CREATED)
