@@ -78,6 +78,7 @@ class Comment(Document):
     product_id: PydanticObjectId
     created_at: datetime = datetime.now(tz=timezone.utc)
     updated_at: datetime | None = None
+    is_reply: bool = False
     replies: list[PydanticObjectId] = []
 
     class Settings:
