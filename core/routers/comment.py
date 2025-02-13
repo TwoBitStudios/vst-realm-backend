@@ -5,6 +5,7 @@ from fastapi import (
     HTTPException,
     status,
 )
+from datetime import datetime
 
 from core.models import Comment
 
@@ -13,12 +14,31 @@ router = APIRouter(tags=['Comment'])
 
 @router.get('/')
 async def list_comments() -> list[Comment]:
-    return Comment.find()
+    return await Comment.find().to_list()
 
+@router.get('/{productId}/')
+async def list_comments(productId: PydanticObjectId) -> list[Comment]:
+    return await Comment.find(Comment.product_id == productId).to_list()
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_comment(comment: Comment) -> Comment:
     return await comment.save()
+
+@router.post('/{commentId}/', status_code=status.HTTP_201_CREATED)
+async def create_reply(commentId: str, comment: Comment) -> Comment:
+    parentComment = await Comment.find_one({'_id': PydanticObjectId(commentId)})
+    if not parentComment:
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parent Comment not found.')
+    
+    await comment.save()
+
+    parentComment.replies.append(comment.id)
+    parentComment.updated_at = datetime.now()
+
+    await parentComment.save()
+
+    return comment
+
 
 
 @router.get('/{id}/')

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-
 import pymongo
 from beanie import (
     BackLink,
@@ -70,7 +69,6 @@ class CommentVote(Document):
     action: CommentAction
     comment_id: PydanticObjectId
     user_id: PydanticObjectId
-
 
 class Comment(Document):
     message: str
