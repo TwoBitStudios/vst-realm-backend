@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
+
 import pymongo
 from beanie import (
     BackLink,
@@ -70,11 +71,12 @@ class CommentVote(Document):
     comment_id: PydanticObjectId
     user_id: PydanticObjectId
 
+
 class Comment(Document):
     message: str
     user_id: PydanticObjectId
     product_id: PydanticObjectId
-    created_at: datetime = datetime.now()
+    created_at: datetime = datetime.now(tz=timezone.utc)
     updated_at: datetime | None = None
     replies: list[PydanticObjectId] = []
 
