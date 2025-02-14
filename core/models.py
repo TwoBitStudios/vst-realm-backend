@@ -76,7 +76,7 @@ class Comment(Document):
     message: str
     user_id: PydanticObjectId
     product_id: PydanticObjectId
-    created_at: datetime = datetime.now(tz=timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc))
     updated_at: datetime | None = None
     is_reply: bool = False
     replies: list[PydanticObjectId] = []

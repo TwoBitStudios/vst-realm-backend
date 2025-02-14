@@ -25,7 +25,6 @@ class CommentQueryParams(BaseModel):
 async def list_comments(query: Annotated[CommentQueryParams, Query()]) -> list[Comment]:
     query_params = query.model_dump(exclude_none=True, exclude_unset=True)
     sort = query_params.pop('order_by', 'created_at')
-    print(query_params)
 
     return await Comment.find(query_params).sort(sort).to_list()
 
