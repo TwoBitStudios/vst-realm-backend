@@ -68,6 +68,7 @@ async def check_email_exists(email: str) -> dict:
 
 app.include_router(routers.user_router, prefix='/user')
 app.include_router(routers.comment_router, prefix='/comment')
+app.include_router(routers.replies_router, prefix='/replies')
 app.include_router(routers.comment_vote_router, prefix='/comment-vote')
 app.include_router(routers.product_router, prefix='/product')
 app.include_router(routers.base_auth_router, prefix='/auth')
