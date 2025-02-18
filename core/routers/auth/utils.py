@@ -71,16 +71,24 @@ async def update_or_create_account(
 
 
 async def get_or_create_user(
-    given_name: str, family_name: str, email: str, email_verified: bool = False, password: str = ''
+    username: str,
+    given_name: str,
+    family_name: str,
+    email: str,
+    email_verified: bool = False,
+    password: str = '',
+    image: str = '',
 ) -> UserInDB:
 
     if (user := await UserInDB.find_one(UserInDB.email == email)) is None:
         user = UserInDB(
+            username=username,
             given_name=given_name,
             family_name=family_name,
             email=email,
             email_verified=email_verified,
-            password=password
+            password=password,
+            image=image,
         )
 
         await user.save()
@@ -88,9 +96,15 @@ async def get_or_create_user(
     return user
 
 
-async def authenticate_user(email: str, password: str) -> UserInDB | None:
-    if (user := await UserInDB.find_one(UserInDB.email == email)) is None:
-        return None
+async def authenticate_user(email_or_username: str, password: str) -> UserInDB | None:
+    """ Attempts to authenticate the user from the given email/username.
+    
+        Checks if a user exists with the given email, or with the given username, then
+        checks if the password hashes match.
+    """
+    if (user := await UserInDB.find_one(UserInDB.email == email_or_username)) is None:
+        if (user := await UserInDB.find_one(UserInDB.username == email_or_username)) is None:
+            return None
 
     if not pwd_context.verify(password, user.password):
         return None

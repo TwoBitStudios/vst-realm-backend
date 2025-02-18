@@ -6,6 +6,7 @@ from datetime import (
 )
 from http import HTTPStatus
 from json import JSONDecodeError
+from uuid import uuid4
 
 import requests
 from fastapi import APIRouter, HTTPException
@@ -55,10 +56,12 @@ async def auth_google(code: str, redirect_uri: str | None = None) -> Token:
 
     user = User.from_db(
         await get_or_create_user(
+            username=f'{user_data.get("given_name")}-{str(uuid4())}',
             given_name=user_data.get('given_name'),
             family_name=user_data.get('family_name'),
             email=user_data.get('email'),
             email_verified=user_data.get('verified_email'),
+            image=user_data.get('picture', ''),
         )
     )
 

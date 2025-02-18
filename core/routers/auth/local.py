@@ -26,9 +26,9 @@ router = APIRouter(tags=['Auth'])
 
 
 @router.post('/login/', summary='Local: Login')
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
+async def login(data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     """ The authentication endpoint to be used if authenticating with local credentials. """
-    if (user := await authenticate_user(form_data.username, form_data.password)) is None:
+    if (user := await authenticate_user(data.username, data.password)) is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Incorrect email or password',

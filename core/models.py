@@ -17,28 +17,44 @@ from core.constants import CommentAction, Provider
 
 class User(BaseModel):
     id: PydanticObjectId = Field(alias='_id')
+    username: str
     given_name: str
     family_name: str
     email: str
     email_verified: bool = False
+    image: str = ''
 
     @classmethod
-    def from_db(cls, _user: UserInDB):
+    def from_db(cls, user: UserInDB):
         return cls(
-            _id=_user.id,
-            given_name=_user.given_name,
-            family_name=_user.family_name,
-            email=_user.email,
-            email_verified=_user.email_verified,
+            _id=user.id,
+            username=user.username,
+            given_name=user.given_name,
+            family_name=user.family_name,
+            email=user.email,
+            email_verified=user.email_verified,
+            image=user.email
         )
 
 
+class PublicUser(BaseModel):
+    id: PydanticObjectId = Field(alias='_id')
+    username: str
+    image: str = ''
+
+    @classmethod
+    def from_db(cls, user: UserInDB):
+        return cls(_id=user.id, username=user.username, image=user.email)
+
+
 class UserInDB(Document):
+    username: Indexed(str, unique=True)
     given_name: str
     family_name: str
     email: Indexed(str, unique=True)
     email_verified: bool = False
     password: str
+    image: str = ''
     comments: list[BackLink['Comment']] = Field(list(), original_field='user')
 
     class Settings:
